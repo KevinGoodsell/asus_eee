@@ -1,3 +1,7 @@
+18 Oct 2008 // Version 0.3.1
+
+    - &proc_dir deprecated, replaced by NULL
+
 04 Feb 2008 // Version 0.3
 
     - modules init and exit code restyling

@@ -473,7 +473,7 @@ static void eee_proc_cleanup(void) {
     for (i = 0; eee_proc_files[i].name; i++) {
         remove_proc_entry(eee_proc_files[i].name, eee_proc_rootdir);
     }
-    remove_proc_entry("eee", &proc_root);
+    remove_proc_entry("eee", NULL);
 }
 
 #define WRITABLE(x) do { if(!writable) (x) &= 0x0577; } while(0)
@@ -482,7 +482,7 @@ static int __init eee_proc_init(void) {
     int i;
 
     /* Create the /proc/eee directory. */
-    eee_proc_rootdir = proc_mkdir("eee", &proc_root);
+    eee_proc_rootdir = proc_mkdir("eee", NULL);
     if (!eee_proc_rootdir) {
         printk(KERN_ERR "%s: Unable to create /proc/eee\n", EEE_NAME);
         return false;
@@ -523,7 +523,7 @@ proc_init_fail:
     for (; i >= 0; i--) {
         remove_proc_entry(eee_proc_files[i].name, eee_proc_rootdir);
     }
-    remove_proc_entry("eee", &proc_root);
+    remove_proc_entry("eee", NULL);
 #endif
     eee_proc_cleanup();
     return false;
