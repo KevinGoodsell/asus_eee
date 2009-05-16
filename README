@@ -1,0 +1,10 @@
+
+The module itself is in the module/ directory.  To build and insert the
+module into your kernel:
+    cd module
+    make
+    insmod eee.ko
+
+The eee.c file has some detailed comments in it regarding usage and some
+background on my investigations into the eee's BIOS and ACPI...
+
