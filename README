@@ -3,7 +3,7 @@ The module itself is in the module/ directory.  To build and insert the
 module into your kernel:
     cd module
     make
-    insmod eee.ko
+    insmod asus_eee.ko
 
 Usage:  once the module has been inserted, several files will appear in the
 /proc/eee directory:
