@@ -40,6 +40,27 @@
 #include <asm/io.h>             // For inb() and outb()
 #include <linux/i2c.h>
 #include <linux/mutex.h>
+#include <linux/pci.h>
+
+struct pci_device_id eeepc_pci_tbl[] = {
+	{
+		.vendor			= PCI_ANY_ID,
+		.device			= PCI_ANY_ID,
+		.subvendor		= PCI_VENDOR_ID_ASUSTEK,
+		.subdevice		= 0x82d9, // EeePC 700, 900
+	},{
+		.vendor			= PCI_ANY_ID,
+		.device			= PCI_ANY_ID,
+		.subvendor		= PCI_VENDOR_ID_ASUSTEK,
+		.subdevice		= 0x8340, // EeePC 900A,
+	},{
+		.vendor			= PCI_ANY_ID,
+		.device			= PCI_ANY_ID,
+		.subvendor		= PCI_VENDOR_ID_ASUSTEK,
+		.subdevice		= 0x830f, // EeePC 901, 1000
+	},{
+	}
+};
 
 /* Module info */
 MODULE_LICENSE("GPL");
@@ -51,6 +72,7 @@ MODULE_DESCRIPTION("Support for eeePC-specific functionality.");
 
 MODULE_VERSION(EEE_VERSION);
 MODULE_INFO(module_depends, "i2c-i801");
+MODULE_DEVICE_TABLE(pci, eeepc_pci_tbl);
 
 static int writable = 0;
 module_param(writable, int, 0644);
