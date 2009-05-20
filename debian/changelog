@@ -1,0 +1,6 @@
+asus-eee-dkms (0.3.1) stable; urgency=low
+
+  * Automatically packaged by DKMS.
+
+ -- DKMS <dkms-devel@Dell.com>  Wed, 20 May 2009 18:07:51 +0000
+
