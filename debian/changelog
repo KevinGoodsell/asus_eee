@@ -1,6 +1,6 @@
-asus-eee-dkms (0.3.1) stable; urgency=low
+asus-eee-dkms (0.3.1) jaunty; urgency=low
 
-  * Automatically packaged by DKMS.
+  * Packaged for DKMS.
 
- -- DKMS <dkms-devel@Dell.com>  Wed, 20 May 2009 18:07:51 +0000
+ -- Kevin Goodsell <kevin-opensource@omegacrash.net>  Wed, 20 May 2009 18:07:51 +0000
 
