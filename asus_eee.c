@@ -364,17 +364,18 @@ static struct proc_dir_entry *eee_proc_rootdir;
 #define EEE_PROC_FILES_BEGIN \
     static struct eee_proc_file eee_proc_files[] = {
 #define EEE_PROC_RW(NAME, MODE) \
-    { #NAME, MODE, &eee_proc_readfunc_##NAME, &eee_proc_writefunc_##NAME }
+    { #NAME, MODE, &eee_proc_readfunc_##NAME, &eee_proc_writefunc_##NAME, false }
 #define EEE_PROC_RO(NAME, MODE) \
-    { #NAME, MODE, &eee_proc_readfunc_##NAME, NULL }
+    { #NAME, MODE, &eee_proc_readfunc_##NAME, NULL, false }
 #define EEE_PROC_FILES_END \
-    { NULL, 0, NULL, NULL } };
+    { NULL, 0, NULL, NULL, false } };
 
 struct eee_proc_file {
     char *name;
     int mode;
     void (*readfunc)(char *buf, int buflen, int *bufpos);
     void (*writefunc)(const char *buf, int buflen, int *bufpos);
+    bool initialized;
 };
 
 
@@ -524,7 +525,10 @@ static void eee_proc_cleanup(void)
 {
     int i;
     for (i = 0; eee_proc_files[i].name; i++) {
-        remove_proc_entry(eee_proc_files[i].name, eee_proc_rootdir);
+        if (eee_proc_files[i].initialized) {
+            remove_proc_entry(eee_proc_files[i].name, eee_proc_rootdir);
+            eee_proc_files[i].initialized = false;
+        }
     }
     remove_proc_entry("eee", NULL);
 }
@@ -559,6 +563,7 @@ static int __init eee_proc_init(void)
             error = -EIO;
             goto proc_init_fail;
         }
+        f->initialized = true;
         proc_file->read_proc = &eee_proc_readfunc;
         if (f->writefunc) {
             proc_file->write_proc = &eee_proc_writefunc;
@@ -573,11 +578,7 @@ static int __init eee_proc_init(void)
 
     /* We had an error, so cleanup all of the proc files... */
 proc_init_fail:
-    /* Remove only those entries that have been successfully added. */
-    for (; i >= 0; i--) {
-        remove_proc_entry(eee_proc_files[i].name, eee_proc_rootdir);
-    }
-    remove_proc_entry("eee", NULL);
+    eee_proc_cleanup();
     return error;
 }
 
