@@ -502,12 +502,13 @@ static void eee_proc_cleanup(void) {
 
 static int __init eee_proc_init(void) {
     int i;
+    int error = 0;
 
     /* Create the /proc/eee directory. */
     eee_proc_rootdir = proc_mkdir("eee", NULL);
     if (!eee_proc_rootdir) {
         printk(KERN_ERR "%s: Unable to create /proc/eee\n", EEE_NAME);
-        return false;
+        return -EIO;
     }
     eee_proc_rootdir->owner = THIS_MODULE;
 
@@ -525,6 +526,7 @@ static int __init eee_proc_init(void) {
         proc_file = create_proc_entry(f->name, f->mode, eee_proc_rootdir);
         if (!proc_file) {
             printk(KERN_ERR "%s: Unable to create /proc/eee/%s", EEE_NAME, f->name);
+            error = -EIO;
             goto proc_init_fail;
         }
         proc_file->read_proc = &eee_proc_readfunc;
@@ -537,35 +539,32 @@ static int __init eee_proc_init(void) {
         proc_file->uid = 0;
         proc_file->gid = 0;
     }
-    return true;
+    return error;
 
     /* We had an error, so cleanup all of the proc files... */
 proc_init_fail:
-#if 0 /* using eee_proc_cleanup seems to me better than duplicating code */
+    /* Remove only those entries that have been successfully added. */
     for (; i >= 0; i--) {
         remove_proc_entry(eee_proc_files[i].name, eee_proc_rootdir);
     }
     remove_proc_entry("eee", NULL);
-#endif
-    eee_proc_cleanup();
-    return false;
+    return error;
 }
 
 
 /*** Module initialization ***/
 
 int __init init_module(void) {
-	eee_pll_init();
-	if(eee_proc_init()) {
-		printk(KERN_NOTICE "%s version %s init sucessfully\n", 
-			EEE_NAME, EEE_VERSION);
-		if(writable)
-			printk(KERN_NOTICE "%s informs writable=1 is dangerous"
-				": think before writing, do not let your CPU burns out!\n", 
-					EEE_NAME);
-		return true;
-	}
-	return false;
+    int error = 0;
+
+    eee_pll_init();
+    error = eee_proc_init();
+    if (error < 0)
+        return error;
+
+    printk(KERN_NOTICE "%s: init succeeded (version %s)\n", EEE_NAME,
+        EEE_VERSION);
+    return 0;
 }
 
 void __exit cleanup_module(void) {
