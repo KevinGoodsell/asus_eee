@@ -76,8 +76,8 @@ MODULE_DEVICE_TABLE(pci, eeepc_pci_tbl);
 
 static int writable = 0;
 module_param(writable, int, 0644);
-MODULE_PARM_DESC(insanelev, "Some functioning parameters"
-    "could be changed but risky");
+MODULE_PARM_DESC(writable, "Allow potentially unsafe changes to hardware "
+                           "parameters");
 
 /* PLL access functions.
  *
@@ -529,8 +529,6 @@ static void eee_proc_cleanup(void)
     remove_proc_entry("eee", NULL);
 }
 
-#define WRITABLE(x) do { if (!writable) (x) &= 0x0577; } while (0)
-
 static int __init eee_proc_init(void)
 {
     int i;
@@ -552,8 +550,8 @@ static int __init eee_proc_init(void)
         struct proc_dir_entry *proc_file;
         struct eee_proc_file *f = &eee_proc_files[i];
 
-        /* Protect dummy user to destroy they Eee PC for error */
-        WRITABLE(f->mode);
+        if (!writable)
+            f->mode &= 0555;
 
         proc_file = create_proc_entry(f->name, f->mode, eee_proc_rootdir);
         if (!proc_file) {
