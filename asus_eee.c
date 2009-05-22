@@ -483,7 +483,7 @@ EEE_PROC_FILES_END
 int eee_proc_readfunc(char *buffer, char **buffer_location, off_t offset,
                       int buffer_length, int *eof, void *data)
 {
-    struct eee_proc_file *procfile = (struct eee_proc_file *)data;
+    struct eee_proc_file *procfile = data;
     int bufpos = 0;
 
     if (!procfile || !procfile->readfunc) {
@@ -504,7 +504,7 @@ int eee_proc_writefunc(struct file *file, const char *buffer,
 {
     char userdata[129];
     int bufpos = 0;
-    struct eee_proc_file *procfile = (struct eee_proc_file *)data;
+    struct eee_proc_file *procfile = data;
 
     if (!procfile || !procfile->writefunc) {
         return -EIO;
