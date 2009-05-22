@@ -19,7 +19,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Template Place, Suite 330, Boston, MA  02111-1307 USA
- *  
+ *
  *  ---------
  *
  *  WARNING:  This is an extremely *experimental* module!  This code has been
@@ -43,23 +43,23 @@
 #include <linux/pci.h>
 
 struct pci_device_id eeepc_pci_tbl[] = {
-	{
-		.vendor			= PCI_ANY_ID,
-		.device			= PCI_ANY_ID,
-		.subvendor		= PCI_VENDOR_ID_ASUSTEK,
-		.subdevice		= 0x82d9, // EeePC 700, 900
-	},{
-		.vendor			= PCI_ANY_ID,
-		.device			= PCI_ANY_ID,
-		.subvendor		= PCI_VENDOR_ID_ASUSTEK,
-		.subdevice		= 0x8340, // EeePC 900A,
-	},{
-		.vendor			= PCI_ANY_ID,
-		.device			= PCI_ANY_ID,
-		.subvendor		= PCI_VENDOR_ID_ASUSTEK,
-		.subdevice		= 0x830f, // EeePC 901, 1000
-	},{
-	}
+    {
+        .vendor         = PCI_ANY_ID,
+        .device         = PCI_ANY_ID,
+        .subvendor      = PCI_VENDOR_ID_ASUSTEK,
+        .subdevice      = 0x82d9, // EeePC 700, 900
+    },{
+        .vendor         = PCI_ANY_ID,
+        .device         = PCI_ANY_ID,
+        .subvendor      = PCI_VENDOR_ID_ASUSTEK,
+        .subdevice      = 0x8340, // EeePC 900A,
+    },{
+        .vendor         = PCI_ANY_ID,
+        .device         = PCI_ANY_ID,
+        .subvendor      = PCI_VENDOR_ID_ASUSTEK,
+        .subdevice      = 0x830f, // EeePC 901, 1000
+    },{
+    }
 };
 
 /* Module info */
@@ -76,8 +76,8 @@ MODULE_DEVICE_TABLE(pci, eeepc_pci_tbl);
 
 static int writable = 0;
 module_param(writable, int, 0644);
-MODULE_PARM_DESC(insanelev, "Some functioning parameters" 
-	"could be changed but risky");
+MODULE_PARM_DESC(insanelev, "Some functioning parameters"
+    "could be changed but risky");
 
 /* PLL access functions.
  *
@@ -89,88 +89,93 @@ static bool eee_pll_read(void);
 static bool eee_pll_write(void);
 static void eee_pll_cleanup(void);
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,10) && LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22) 
-/* This was removed in Linux 2.6.10 because it had no users, 
- * but has been restored back later in version 2.6.22 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,10) && LINUX_VERSION_CODE < KERNEL_VERSION(2,6,22)
+/* This was removed in Linux 2.6.10 because it had no users,
+ * but has been restored back later in version 2.6.22
  */
-static s32 i2c_smbus_read_block_data(struct i2c_client *client, u8 command, 
-								u8 *values) {
-	union i2c_smbus_data data;
-	if(!client || !client->adapter || !values) {
-		printk(KERN_WARNING "%s internal i2c_smbus_read_block_data"
-			" received a NULL pointer\n", EEE_NAME);
-	}
-	if (i2c_smbus_xfer(client->adapter, client->addr, client->flags,
-		I2C_SMBUS_READ,command, I2C_SMBUS_BLOCK_DATA, &data)) {
-	} else {
-		int i;
-		for (i = 1; i <= data.block[0]; i++)
-			values[i-1] = data.block[i];
-		return data.block[0];
-	}
-	return -1;
+static s32 i2c_smbus_read_block_data(struct i2c_client *client, u8 command,
+                                     u8 *values)
+{
+    union i2c_smbus_data data;
+    if (!client || !client->adapter || !values) {
+        printk(KERN_WARNING "%s internal i2c_smbus_read_block_data"
+            " received a NULL pointer\n", EEE_NAME);
+    }
+    if (i2c_smbus_xfer(client->adapter, client->addr, client->flags,
+        I2C_SMBUS_READ,command, I2C_SMBUS_BLOCK_DATA, &data)) {
+    } else {
+        int i;
+        for (i = 1; i <= data.block[0]; i++)
+            values[i-1] = data.block[i];
+        return data.block[0];
+    }
+    return -1;
 }
-#endif 
+#endif
 
 static struct i2c_client eee_pll_smbus_client = {
-	.adapter = NULL,
-	.addr = 0x69,
-	.flags = 0,
+    .adapter = NULL,
+    .addr = 0x69,
+    .flags = 0,
 };
 static char eee_pll_data[I2C_SMBUS_BLOCK_MAX];
 static int eee_pll_datalen = 0;
 
-static bool eee_pll_init(void) {
-	/* this module depends on this symbol */
-	if(__symbol_get("i2c_get_adapter"))
-		eee_pll_smbus_client.adapter = i2c_get_adapter(0);
+static bool eee_pll_init(void)
+{
+    /* this module depends on this symbol */
+    if (__symbol_get("i2c_get_adapter"))
+        eee_pll_smbus_client.adapter = i2c_get_adapter(0);
 
-	if(!eee_pll_smbus_client.adapter) {
-		printk(KERN_WARNING 
-			"%s module requires i2c-i801 module at load time" 
-				" if you like to access pll via proc too\n", 
-					EEE_NAME);
-		return false;
-	} 
+    if (!eee_pll_smbus_client.adapter) {
+        printk(KERN_WARNING
+            "%s module requires i2c-i801 module at load time if you like to "
+            "access pll via proc too\n",
+            EEE_NAME);
+        return false;
+    }
 
-	/* Fill the eee_pll_data buffer */
-	return eee_pll_read();
+    /* Fill the eee_pll_data buffer */
+    return eee_pll_read();
 }
 
-static bool reinit_ifneeded(void) {
-	if(!eee_pll_smbus_client.adapter) {
-		if(!eee_pll_init()) {
-			return false;	
-		} else {
-			printk(KERN_INFO 
-				"%s module found an i2c_adapter,"
-					"pll proc could be read by now\n",
-						EEE_NAME);
-		}
-	} 
-	return true;
+static bool reinit_ifneeded(void)
+{
+    if (!eee_pll_smbus_client.adapter) {
+        if (!eee_pll_init()) {
+            return false;
+        } else {
+            printk(KERN_INFO "%s module found an i2c_adapter, pll proc "
+                "could be read by now\n",
+                EEE_NAME);
+        }
+    }
+    return true;
 }
 
 // Takes approx 150ms to execute.
-static bool eee_pll_read(void) {
-	if(!reinit_ifneeded()) return false;
-	memset(eee_pll_data, 0, I2C_SMBUS_BLOCK_MAX);
-	eee_pll_datalen = i2c_smbus_read_block_data(&eee_pll_smbus_client, 
-		0, eee_pll_data);
-	return true;
+static bool eee_pll_read(void)
+{
+    if (!reinit_ifneeded()) return false;
+    memset(eee_pll_data, 0, I2C_SMBUS_BLOCK_MAX);
+    eee_pll_datalen = i2c_smbus_read_block_data(&eee_pll_smbus_client,
+        0, eee_pll_data);
+    return true;
 }
 
 // Takes approx 150ms to execute ???
-static bool eee_pll_write(void) {
-	if(!reinit_ifneeded()) return false;
-	i2c_smbus_write_block_data(&eee_pll_smbus_client, 
-		0, eee_pll_datalen, eee_pll_data);
-	return true;
+static bool eee_pll_write(void)
+{
+    if (!reinit_ifneeded()) return false;
+    i2c_smbus_write_block_data(&eee_pll_smbus_client,
+        0, eee_pll_datalen, eee_pll_data);
+    return true;
 }
 
-static void eee_pll_cleanup(void) {
-	if(eee_pll_smbus_client.adapter)
-		i2c_put_adapter(eee_pll_smbus_client.adapter);
+static void eee_pll_cleanup(void)
+{
+    if (eee_pll_smbus_client.adapter)
+        i2c_put_adapter(eee_pll_smbus_client.adapter);
 }
 
 /* Embedded controller access functions.
@@ -194,7 +199,8 @@ static void eee_pll_cleanup(void) {
 #define LOW_BYTE(x) (x & 0x00ff)
 static DEFINE_MUTEX(eee_ec_mutex);
 
-static unsigned char eee_ec_read(unsigned short addr) {
+static unsigned char eee_ec_read(unsigned short addr)
+{
     unsigned char data;
 
     mutex_lock(&eee_ec_mutex);
@@ -206,7 +212,8 @@ static unsigned char eee_ec_read(unsigned short addr) {
     return data;
 }
 
-static void eee_ec_write(unsigned short addr, unsigned char data) {
+static void eee_ec_write(unsigned short addr, unsigned char data)
+{
     mutex_lock(&eee_ec_mutex);
     outb(HIGH_BYTE(addr), EC_IDX_ADDRH);
     outb(LOW_BYTE(addr), EC_IDX_ADDRL);
@@ -218,7 +225,8 @@ static void eee_ec_write(unsigned short addr, unsigned char data) {
 #define EC_GPIO_PIN2PORT(pin) (EC_GPIO_PORT + (((pin) >> 3) & 0x1F))
 #define EC_GPIO_PIN2MASK(pin) (1 << ((pin) & 0x07))
 
-static void eee_ec_gpio_set(int pin, int value) {
+static void eee_ec_gpio_set(int pin, int value)
+{
     unsigned short port;
     unsigned char mask;
 
@@ -231,7 +239,8 @@ static void eee_ec_gpio_set(int pin, int value) {
     }
 }
 
-static int eee_ec_gpio_get(int pin) {
+static int eee_ec_gpio_get(int pin)
+{
     unsigned short port;
     unsigned char mask;
     unsigned char status;
@@ -251,20 +260,24 @@ static int eee_ec_gpio_get(int pin) {
 #define EC_SFB3 0xF4D3          // Flag byte containing SF25 (FANctrl)
 #define MANUAL_FAN_BIT 0x02
 
-static unsigned int eee_get_temperature(void) {
+static unsigned int eee_get_temperature(void)
+{
     return eee_ec_read(EC_ST00);
 }
 
-static unsigned int eee_fan_get_rpm(void) {
+static unsigned int eee_fan_get_rpm(void)
+{
     return (eee_ec_read(EC_SC05) << 8) | eee_ec_read(EC_SC06);
 }
 
 /* 1 if fan is in manual mode, 0 if controlled by the EC */
-static int eee_fan_get_manual(void) {
+static int eee_fan_get_manual(void)
+{
     return (eee_ec_read(EC_SFB3) & MANUAL_FAN_BIT) ? 1 : 0;
 }
 
-static void eee_fan_set_manual(int manual) {
+static void eee_fan_set_manual(int manual)
+{
     if (manual) {
         /* SF25=1: Prevent the EC from controlling the fan */
         eee_ec_write(EC_SFB3, eee_ec_read(EC_SFB3) | MANUAL_FAN_BIT);
@@ -274,11 +287,13 @@ static void eee_fan_set_manual(int manual) {
     }
 }
 
-static void eee_fan_set_speed(unsigned int speed) {
+static void eee_fan_set_speed(unsigned int speed)
+{
     eee_ec_write(EC_SC02, (speed > 100) ? 100 : speed);
 }
 
-static unsigned int eee_fan_get_speed(void) {
+static unsigned int eee_fan_get_speed(void)
+{
     return eee_ec_read(EC_SC02);
 }
 
@@ -287,10 +302,12 @@ static unsigned int eee_fan_get_speed(void) {
 #define EC_VOLTAGE_PIN 0x66
 
 enum eee_voltage { Low=0, High=1 };
-static enum eee_voltage eee_get_voltage(void) {
+static enum eee_voltage eee_get_voltage(void)
+{
     return eee_ec_gpio_get(EC_VOLTAGE_PIN);
 }
-static void eee_set_voltage(enum eee_voltage voltage) {
+static void eee_set_voltage(enum eee_voltage voltage)
+{
     eee_ec_gpio_set(EC_VOLTAGE_PIN, voltage);
 }
 
@@ -300,12 +317,14 @@ static void eee_set_voltage(enum eee_voltage voltage) {
 #define FSB_MSB_MASK 0x3F
 #define FSB_LSB_MASK 0xFF
 
-static void eee_get_freq(int *n, int *m) {
+static void eee_get_freq(int *n, int *m)
+{
     *m = eee_pll_data[FSB_MSB_INDEX] & FSB_MSB_MASK;
     *n = eee_pll_data[FSB_LSB_INDEX];
 }
 
-static void eee_set_freq(int n, int m) {
+static void eee_set_freq(int n, int m)
+{
     int current_n = 0, current_m = 0;
     eee_get_freq(&current_n, &current_m);
     if (current_n != n || current_m != m) {
@@ -359,7 +378,8 @@ struct eee_proc_file {
 };
 
 
-EEE_PROC_READFUNC(fsb) {
+EEE_PROC_READFUNC(fsb)
+{
     int n = 0;
     int m = 0;
     int voltage = 0;
@@ -368,7 +388,8 @@ EEE_PROC_READFUNC(fsb) {
     EEE_PROC_PRINTF("%d %d %d\n", n, m, voltage);
 }
 
-EEE_PROC_WRITEFUNC(fsb) {
+EEE_PROC_WRITEFUNC(fsb)
+{
     int n = 70;     // sensible defaults
     int m = 24;
     int voltage = 0;
@@ -377,39 +398,46 @@ EEE_PROC_WRITEFUNC(fsb) {
     eee_set_voltage(voltage);
 }
 
-EEE_PROC_READFUNC(pll) {
+EEE_PROC_READFUNC(pll)
+{
     eee_pll_read();
     EEE_PROC_MEMCPY(eee_pll_data, eee_pll_datalen);
 }
 
-EEE_PROC_READFUNC(fan_speed) {
+EEE_PROC_READFUNC(fan_speed)
+{
     int speed = eee_fan_get_speed();
     EEE_PROC_PRINTF("%d\n", speed);
 }
 
-EEE_PROC_WRITEFUNC(fan_speed) {
+EEE_PROC_WRITEFUNC(fan_speed)
+{
     unsigned int speed = 0;
     EEE_PROC_SCANF(1, "%u", &speed);
     eee_fan_set_speed(speed);
 }
 
-EEE_PROC_READFUNC(fan_rpm) {
+EEE_PROC_READFUNC(fan_rpm)
+{
     int rpm = eee_fan_get_rpm();
     EEE_PROC_PRINTF("%d\n", rpm);
 }
 
-EEE_PROC_READFUNC(fan_manual) {
+EEE_PROC_READFUNC(fan_manual)
+{
     EEE_PROC_PRINTF("%d\n", eee_fan_get_manual());
 }
 
-EEE_PROC_WRITEFUNC(fan_manual) {
+EEE_PROC_WRITEFUNC(fan_manual)
+{
     int manual = 0;
     EEE_PROC_SCANF(1, "%i", &manual);
     eee_fan_set_manual(manual);
 }
 
 #if 0
-EEE_PROC_READFUNC(fan_mode) {
+EEE_PROC_READFUNC(fan_mode)
+{
     enum eee_fan_mode mode = eee_fan_get_mode();
     switch (mode) {
         case Manual:    EEE_PROC_PRINTF("manual\n");
@@ -421,7 +449,8 @@ EEE_PROC_READFUNC(fan_mode) {
     }
 }
 
-EEE_PROC_WRITEFUNC(fan_mode) {
+EEE_PROC_WRITEFUNC(fan_mode)
+{
     enum eee_fan_mode mode = Automatic;
     char inputstr[16];
     EEE_PROC_SCANF(1, "%15s", inputstr);
@@ -436,13 +465,14 @@ EEE_PROC_WRITEFUNC(fan_mode) {
 }
 #endif
 
-EEE_PROC_READFUNC(temperature) {
+EEE_PROC_READFUNC(temperature)
+{
     unsigned int t = eee_get_temperature();
     EEE_PROC_PRINTF("%d\n", t);
 }
 
 EEE_PROC_FILES_BEGIN
-    EEE_PROC_RO(pll,            0400),	/* this has to be the first */
+    EEE_PROC_RO(pll,            0400),  /* this has to be the first */
     EEE_PROC_RW(fsb,            0644),
     EEE_PROC_RW(fan_speed,      0644),
     EEE_PROC_RO(fan_rpm,        0444),
@@ -490,7 +520,8 @@ int eee_proc_writefunc(struct file *file, const char *buffer,
     return count;
 }
 
-static void eee_proc_cleanup(void) {
+static void eee_proc_cleanup(void)
+{
     int i;
     for (i = 0; eee_proc_files[i].name; i++) {
         remove_proc_entry(eee_proc_files[i].name, eee_proc_rootdir);
@@ -498,9 +529,10 @@ static void eee_proc_cleanup(void) {
     remove_proc_entry("eee", NULL);
 }
 
-#define WRITABLE(x) do { if(!writable) (x) &= 0x0577; } while(0)
+#define WRITABLE(x) do { if (!writable) (x) &= 0x0577; } while (0)
 
-static int __init eee_proc_init(void) {
+static int __init eee_proc_init(void)
+{
     int i;
     int error = 0;
 
@@ -520,8 +552,8 @@ static int __init eee_proc_init(void) {
         struct proc_dir_entry *proc_file;
         struct eee_proc_file *f = &eee_proc_files[i];
 
-	/* Protect dummy user to destroy they Eee PC for error */
-	WRITABLE(f->mode);
+        /* Protect dummy user to destroy they Eee PC for error */
+        WRITABLE(f->mode);
 
         proc_file = create_proc_entry(f->name, f->mode, eee_proc_rootdir);
         if (!proc_file) {
@@ -554,7 +586,8 @@ proc_init_fail:
 
 /*** Module initialization ***/
 
-int __init init_module(void) {
+int __init init_module(void)
+{
     int error = 0;
 
     eee_pll_init();
@@ -567,7 +600,8 @@ int __init init_module(void) {
     return 0;
 }
 
-void __exit cleanup_module(void) {
-	eee_pll_cleanup();
-	eee_proc_cleanup();
+void __exit cleanup_module(void)
+{
+    eee_pll_cleanup();
+    eee_proc_cleanup();
 }
