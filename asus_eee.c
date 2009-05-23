@@ -42,6 +42,13 @@
 #include <linux/mutex.h>
 #include <linux/pci.h>
 
+/* The 'owner' field was removed from proc_dir_entry in 2.6.30 */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,30)
+#define SET_OWNER(x) (x)->owner = THIS_MODULE
+#else
+#define SET_OWNER(x) do {} while (0)
+#endif
+
 struct pci_device_id eeepc_pci_tbl[] = {
     {
         .vendor         = PCI_ANY_ID,
@@ -542,7 +549,7 @@ static int __init eee_proc_init(void)
         printk(KERN_ERR "%s: Unable to create /proc/eee\n", EEE_NAME);
         return -EIO;
     }
-    eee_proc_rootdir->owner = THIS_MODULE;
+    SET_OWNER(eee_proc_rootdir);
 
     /* Create the individual proc files, but skip pll if i2c_adapter
      * was not found
@@ -567,7 +574,7 @@ static int __init eee_proc_init(void)
             proc_file->write_proc = &eee_proc_writefunc;
         }
         proc_file->data = f;
-        proc_file->owner = THIS_MODULE;
+        SET_OWNER(proc_file);
         proc_file->mode = S_IFREG | f->mode;
         proc_file->uid = 0;
         proc_file->gid = 0;
