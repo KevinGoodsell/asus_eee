@@ -129,8 +129,7 @@ static bool eee_pll_init(void)
 
     if (!eee_pll_smbus_client.adapter) {
         printk(KERN_WARNING
-            "%s module requires i2c-i801 module at load time if you like to "
-            "access pll via proc too\n",
+            "%s: i2c-i801 module not found, pll access disabled.\n",
             EEE_NAME);
         return false;
     }
@@ -145,9 +144,8 @@ static bool reinit_ifneeded(void)
         if (!eee_pll_init()) {
             return false;
         } else {
-            printk(KERN_INFO "%s module found an i2c_adapter, pll proc "
-                "could be read by now\n",
-                EEE_NAME);
+            printk(KERN_INFO "%s: reinit found an i2c_adapter, pll "
+                "access enabled.\n", EEE_NAME);
         }
     }
     return true;
@@ -546,8 +544,8 @@ static int __init eee_proc_init(void)
     }
     eee_proc_rootdir->owner = THIS_MODULE;
 
-    /* Create the individual proc files but avoid
-     * to create pll if i2c_adapter was not found
+    /* Create the individual proc files, but skip pll if i2c_adapter
+     * was not found
      */
     i = (eee_pll_smbus_client.adapter)?0:1;
     for (; eee_proc_files[i].name; i++) {
