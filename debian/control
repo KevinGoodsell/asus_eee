@@ -1,11 +1,14 @@
 Source: asus-eee-dkms
 Section: misc
 Priority: optional
-Maintainer: DKMS <dkms-devel@Dell.com>
+Maintainer: Kevin Goodsell <kevin-opensource@omegacrash.net>
 Build-Depends: debhelper (>= 5)
 Standards-Version: 3.7.2
 
 Package: asus-eee-dkms
 Architecture: all
 Depends: dkms (>= 1.95), bash (>> 1.99)
-Description: asus-eee driver in DKMS format.
+Description: Support for EeePC-specific functionality
+ This module provides access to the EeePC's fan, CPU temperature
+ and voltage, and the timing control chip that manages the
+ front-side bus speed.
