@@ -20,7 +20,7 @@ build: build-stamp
 build-stamp: configure-stamp 
 	dh_testdir
 	mkdir dkms_main_tree dkms_source_tree
-	cp README Makefile CHANGES asus_eee.c debian/dkms.conf dkms_source_tree
+	cp Makefile asus_eee.c debian/dkms.conf dkms_source_tree
 	cp debian/dkms_dbversion dkms_main_tree
 	tar -czf $(DKMS_TAR) dkms_main_tree dkms_source_tree
 	touch $@
@@ -37,6 +37,7 @@ install: build
 	dh_testroot
 	dh_clean -k
 	dh_installdirs
+	dh_installdocs
 	dh_install $(DKMS_TAR) usr/src
 
 binary-arch: build install
@@ -46,7 +47,7 @@ binary-indep: build install
 	dh_testroot
 	#dh_link
 	#dh_strip
-	#dh_compress
+	dh_compress
 	dh_fixperms
 	dh_installdeb
 	#dh_shlibdeps
