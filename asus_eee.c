@@ -82,7 +82,7 @@ MODULE_INFO(module_depends, "i2c-i801");
 MODULE_DEVICE_TABLE(pci, eeepc_pci_tbl);
 
 static int writable = 0;
-module_param(writable, int, 0644);
+module_param(writable, bool, 0644);
 MODULE_PARM_DESC(writable, "Allow potentially unsafe changes to hardware "
                            "parameters");
 
