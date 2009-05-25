@@ -1,7 +1,4 @@
-
-The module itself is in the module/ directory.  To build and insert the
-module into your kernel:
-    cd module
+To build and insert the module into your kernel:
     make
     insmod asus_eee.ko
 
@@ -22,6 +19,10 @@ Usage:  once the module has been inserted, several files will appear in the
                  fan_speed will change the speed of the fan;  the embedded
                  controller makes no changes on its own.
     temperature - The temperature of the CPU (in degrees C).
+
+pll and fsb require the i2c-i801 module. This module must already be loaded
+when the asus_eee module is loaded. Otherwise the pll file will not exist,
+and the fsb file will not function.
 
 Note that when the fan is in manual mode, IT IS POSSIBLE TO DESTROY YOUR CPU!
 It appears that the embedded controller will happily allow the temperature to
