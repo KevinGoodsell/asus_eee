@@ -12,3 +12,7 @@ Description: Support for EeePC-specific functionality
  This module provides access to the EeePC's fan, CPU temperature
  and voltage, and the timing control chip that manages the
  front-side bus speed.
+ .
+ The original page for this project is http://code.google.com/p/eeepc-linux/
+ This package is built from the fork at
+ http://github.com/KevinGoodsell/asus_eee/

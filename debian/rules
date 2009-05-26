@@ -2,7 +2,7 @@
 # -*- makefile -*-
 
 # Uncomment this to turn on verbose mode.
-export DH_VERBOSE=1
+#export DH_VERBOSE=1
 
 DEB_NAME=asus-eee
 NAME=asus-eee
@@ -19,6 +19,7 @@ build: build-stamp
 
 build-stamp: configure-stamp 
 	dh_testdir
+	cp CHANGES changelog
 	mkdir dkms_main_tree dkms_source_tree
 	cp Makefile asus_eee.c debian/dkms.conf dkms_source_tree
 	cp debian/dkms_dbversion dkms_main_tree
@@ -29,7 +30,7 @@ clean:
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
-	rm -rf dkms_main_tree dkms_source_tree $(DKMS_TAR)
+	rm -rf dkms_main_tree dkms_source_tree $(DKMS_TAR) changelog
 	dh_clean
 
 install: build
@@ -38,6 +39,7 @@ install: build
 	dh_clean -k
 	dh_installdirs
 	dh_installdocs
+	dh_installchangelogs
 	dh_install $(DKMS_TAR) usr/src
 
 binary-arch: build install

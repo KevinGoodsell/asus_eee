@@ -1,3 +1,17 @@
+asus-eee-dkms (0.3.1-1) jaunty; urgency=low
+
+  * Fixed "suspicious" init return value (reported here:
+    http://code.google.com/p/eeepc-linux/issues/detail?id=11)
+
+  * Rephrased some comments and strings to make them grammatically correct
+
+  * Check for kernel >= 2.6.30 and don't set proc_dir_entry::owner (removed
+    in that version)
+
+  * Module parameter "writable" is now a bool.
+
+ -- Kevin Goodsell <kevin-opensource@omegacrash.net>  Mon, 25 May 2009 18:14:52 -0700
+
 asus-eee-dkms (0.3.1) jaunty; urgency=low
 
   * Packaged for DKMS.
