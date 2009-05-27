@@ -1,3 +1,9 @@
+asus-eee-dkms (0.3.1-2) jaunty; urgency=low
+
+  * Version change only. Trying to force Launchpad to rebuild the package.
+
+ -- Kevin Goodsell <kevin-opensource@omegacrash.net>  Tue, 26 May 2009 14:12:34 -0700
+
 asus-eee-dkms (0.3.1-1) jaunty; urgency=low
 
   * Fixed "suspicious" init return value (reported here:
